@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:whatsapp_clone/colors.dart';
+import './colors.dart';
+import './responsive/responsive_layout.dart';
+import './screens/mobile_screen_layout.dart';
+import './screens/web_screen_layout.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,8 +16,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Whatsapp Clone',
-      theme: ThemeData.dark().copyWith(backgroundColor: backgroundColor),
-      home: const Text("Hello World"),
+      theme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: backgroundColor, useMaterial3: true),
+      home: const ResponsiveLayout(
+          webScreenLayout: WebScreenLayout(),
+          mobileScreenLayout: MobileScreenLayout()),
     );
   }
 }
