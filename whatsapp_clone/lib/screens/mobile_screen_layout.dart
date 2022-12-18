@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/colors.dart';
 import 'package:whatsapp_clone/widgets/contacts_list.dart';
@@ -15,6 +16,12 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: tabColor,
+          onPressed: () {},
+          shape: const CircleBorder(),
+          child: const Icon(Icons.comment),
+        ),
         appBar: AppBar(
           backgroundColor: appBarColor,
           elevation: 0,

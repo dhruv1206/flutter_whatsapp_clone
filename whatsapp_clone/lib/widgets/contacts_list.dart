@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
 import 'package:whatsapp_clone/colors.dart';
 import 'package:whatsapp_clone/info.dart';
+import 'package:whatsapp_clone/screens/mobile_chat_screen.dart';
 
 class ContactsList extends StatelessWidget {
   const ContactsList({super.key});
@@ -11,7 +12,6 @@ class ContactsList extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: ListView.separated(
-        dragStartBehavior: DragStartBehavior.down,
         separatorBuilder: (_, index) {
           return const Divider(
             color: dividerColor,
@@ -24,7 +24,13 @@ class ContactsList extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => MobileChatScreen(index: index),
+                  ),
+                );
+              },
               child: ListTile(
                 title: Text(
                   info[index]["name"].toString(),

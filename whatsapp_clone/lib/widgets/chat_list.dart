@@ -11,8 +11,8 @@ class ChatList extends StatelessWidget {
     return ListView.builder(
       itemCount: messages.length,
       itemBuilder: (context, index) {
-        if (messages[index]["isMe"] == false) {
-          MyMessageCard(
+        if (messages[index]["isMe"] == true) {
+          return MyMessageCard(
             message: messages[index]["text"].toString(),
             date: messages[index]["time"].toString(),
           );
