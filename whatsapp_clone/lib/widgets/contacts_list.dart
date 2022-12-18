@@ -11,13 +11,13 @@ class ContactsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: ListView.separated(
-        separatorBuilder: (_, index) {
-          return const Divider(
-            color: dividerColor,
-            indent: 85,
-          );
-        },
+      child: ListView.builder(
+        // separatorBuilder: (_, index) {
+        //   return const Divider(
+        //     color: dividerColor,
+        //     indent: 85,
+        //   );
+        // },
         shrinkWrap: true,
         itemCount: info.length,
         itemBuilder: (context, index) {
