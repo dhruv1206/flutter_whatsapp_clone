@@ -1,16 +1,47 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/colors.dart';
-import 'package:whatsapp_clone/widgets/contacts_list.dart';
+import 'package:whatsapp_clone/features/auth/controller/auth_controller.dart';
+import 'package:whatsapp_clone/features/select_contacts/screens/select_contact_screen.dart';
+import 'package:whatsapp_clone/features/chat/widgets/contacts_list.dart';
 
-class MobileScreenLayout extends StatefulWidget {
+class MobileScreenLayout extends ConsumerStatefulWidget {
   const MobileScreenLayout({super.key});
 
   @override
-  State<MobileScreenLayout> createState() => _MobileScreenLayoutState();
+  ConsumerState<MobileScreenLayout> createState() => _MobileScreenLayoutState();
 }
 
-class _MobileScreenLayoutState extends State<MobileScreenLayout> {
+class _MobileScreenLayoutState extends ConsumerState<MobileScreenLayout>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        ref.read(authControllerProvider).setUserState(true);
+        break;
+      case AppLifecycleState.detached:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        ref.read(authControllerProvider).setUserState(false);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -18,7 +49,9 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           backgroundColor: tabColor,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushNamed(SelectContactScreen.routeName);
+          },
           shape: const CircleBorder(),
           child: const Icon(Icons.comment),
         ),

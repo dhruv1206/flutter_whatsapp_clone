@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/colors.dart';
+import 'package:whatsapp_clone/common/enum/message_enum.dart';
+import 'package:whatsapp_clone/features/chat/widgets/display_text_image_gif.dart';
 
-class SenderMessageCard extends StatelessWidget {
+class MyMessageCard extends StatelessWidget {
   final String message;
   final String date;
-  const SenderMessageCard({
+  final MessageEnum messageEnum;
+  const MyMessageCard({
     super.key,
     required this.message,
     required this.date,
+    required this.messageEnum,
   });
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width - 45,
+          minWidth: MediaQuery.of(context).size.width * 0.25,
         ),
         child: Card(
           elevation: 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          color: senderMessageColor,
+          color: messageColor,
           margin: const EdgeInsets.symmetric(
             horizontal: 15,
             vertical: 5,
@@ -31,21 +36,26 @@ class SenderMessageCard extends StatelessWidget {
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                  left: 10,
-                  right: 30,
-                  top: 5,
-                  bottom: 20,
-                ),
-                child: Text(
-                  message,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+                padding: messageEnum == MessageEnum.text
+                    ? const EdgeInsets.only(
+                        left: 10,
+                        right: 30,
+                        top: 5,
+                        bottom: 20,
+                      )
+                    : const EdgeInsets.only(
+                        left: 5,
+                        top: 5,
+                        right: 5,
+                        bottom: 25,
+                      ),
+                child: DisplayTextImageGIF(
+                  message: message,
+                  type: messageEnum,
                 ),
               ),
               Positioned(
-                bottom: 2,
+                bottom: 4,
                 right: 10,
                 child: Row(
                   children: [
