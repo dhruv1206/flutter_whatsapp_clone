@@ -6,9 +6,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/common/enum/message_enum.dart';
+import 'package:whatsapp_clone/common/providers/message_reply_provider.dart';
 import 'package:whatsapp_clone/features/auth/controller/auth_controller.dart';
+import 'package:whatsapp_clone/features/calls/repository/call_repository.dart';
 import 'package:whatsapp_clone/features/chat/repository/chat_repository.dart';
 import 'package:whatsapp_clone/models/chat_contact.dart';
+import 'package:whatsapp_clone/models/group.dart';
 import 'package:whatsapp_clone/models/message.dart';
 
 final chatControllerProvider = Provider((ref) {
@@ -32,22 +35,36 @@ class ChatController {
     return chatRepository.getChatContacts();
   }
 
+  Stream<List<Group>> chatGroups() {
+    return chatRepository.getChatGroups();
+  }
+
   Stream<List<Message>> chatStream(String recieverUserId) {
     return chatRepository.getChatStream(recieverUserId);
+  }
+
+  Stream<List<Message>> groupChatStream(String groupId) {
+    return chatRepository.getGroupChatStream(groupId);
   }
 
   void sendTextMessage(
     BuildContext context,
     String text,
     String recieverUserId,
+    bool isGroupChat,
   ) {
+    final messageReply = ref.read(messageReplyProvider);
     ref.read(userDataAuthProvider).whenData(
           (val) => chatRepository.sendTextMessage(
-              context: context,
-              text: text,
-              recieverUserId: recieverUserId,
-              senderUser: val!),
+            context: context,
+            text: text,
+            recieverUserId: recieverUserId,
+            senderUser: val!,
+            messageReply: messageReply,
+            isGroupChat: isGroupChat,
+          ),
         );
+    ref.read(messageReplyProvider.notifier).update((state) => null);
   }
 
   void sendFileMessage(
@@ -55,7 +72,10 @@ class ChatController {
     File file,
     String recieverUserId,
     MessageEnum messageEnum,
+    bool isGroupChat,
   ) {
+    final messageReply = ref.read(messageReplyProvider);
+
     ref.read(userDataAuthProvider).whenData(
           (value) => chatRepository.sendFileMessage(
             context: context,
@@ -64,7 +84,22 @@ class ChatController {
             senderUserData: value!,
             ref: ref,
             messageEnum: messageEnum,
+            messageReply: messageReply,
+            isGroupChat: isGroupChat,
           ),
         );
+    ref.read(messageReplyProvider.notifier).update((state) => null);
+  }
+
+  void setChatMessageSeen(
+    BuildContext context,
+    String recieverUserId,
+    String messageId,
+  ) {
+    chatRepository.setChatMessageSeen(
+      context,
+      recieverUserId,
+      messageId,
+    );
   }
 }

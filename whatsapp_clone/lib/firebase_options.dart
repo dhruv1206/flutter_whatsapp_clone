@@ -26,7 +26,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -55,15 +58,5 @@ class DefaultFirebaseOptions {
     messagingSenderId: '858179757629',
     projectId: 'whatsapp-clone-9ddb8',
     storageBucket: 'whatsapp-clone-9ddb8.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDPrFNTPiNXzFeVtQHUMTTT8jXGdHhHfZM',
-    appId: '1:858179757629:ios:d6a97e54047d64e43e6c54',
-    messagingSenderId: '858179757629',
-    projectId: 'whatsapp-clone-9ddb8',
-    storageBucket: 'whatsapp-clone-9ddb8.appspot.com',
-    iosClientId: '858179757629-nd1u7tf0g9o7a5f2gg7393o1kor1lmvi.apps.googleusercontent.com',
-    iosBundleId: 'com.example.whatsappClone',
   );
 }

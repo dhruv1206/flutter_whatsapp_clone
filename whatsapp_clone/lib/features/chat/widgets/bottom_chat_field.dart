@@ -1,20 +1,28 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import "package:flutter/material.dart";
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import 'package:whatsapp_clone/common/providers/message_reply_provider.dart';
 import 'package:whatsapp_clone/common/utils/utils.dart';
 import 'package:whatsapp_clone/features/chat/controller/chat_controller.dart';
-import 'package:whatsapp_clone/models/message.dart';
+import 'package:whatsapp_clone/features/chat/widgets/message_reply_preview.dart';
+
 import '../../../colors.dart';
 import '../../../common/enum/message_enum.dart';
 
 class BottomChatField extends ConsumerStatefulWidget {
   final String recieverUserId;
-
+  final bool isGroupChat;
   const BottomChatField({
     Key? key,
     required this.recieverUserId,
+    required this.isGroupChat,
   }) : super(key: key);
 
   @override
@@ -24,8 +32,38 @@ class BottomChatField extends ConsumerStatefulWidget {
 class _BottomChatFieldState extends ConsumerState<BottomChatField> {
   var isMicEnabled = true;
   final messageController = TextEditingController();
+  FlutterSoundRecorder? soundRecorder;
+  bool isRecorderInit = false;
+  bool isRecording = false;
   var isShowEmojiContainer = false;
   FocusNode focusNode = FocusNode();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    soundRecorder = FlutterSoundRecorder();
+    openAudio();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    messageController.dispose();
+    soundRecorder!.closeRecorder();
+    isRecorderInit = false;
+  }
+
+  void openAudio() async {
+    final status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted) {
+      showSnackBar(
+          context: context, content: "Microphone permission now allowed");
+      return;
+    }
+    await soundRecorder!.openRecorder();
+    isRecorderInit = true;
+  }
 
   void sendTextMessage() async {
     if (isMicEnabled == false) {
@@ -34,10 +72,26 @@ class _BottomChatFieldState extends ConsumerState<BottomChatField> {
             context,
             messageController.text.trim(),
             widget.recieverUserId,
+            widget.isGroupChat,
           );
       setState(() {
         messageController.clear();
         isMicEnabled = true;
+      });
+    } else {
+      var tempDir = await getTemporaryDirectory();
+      var path = "${tempDir.path}/flutter_sound.aac";
+      if (!isRecorderInit) {
+        return;
+      }
+      if (isRecording) {
+        await soundRecorder!.stopRecorder();
+        sendFileMessage(File(path), MessageEnum.audio);
+      } else {
+        await soundRecorder!.startRecorder(toFile: path);
+      }
+      setState(() {
+        isRecording = !isRecording;
       });
     }
   }
@@ -46,9 +100,13 @@ class _BottomChatFieldState extends ConsumerState<BottomChatField> {
     File file,
     MessageEnum messageEnum,
   ) {
-    ref
-        .read(chatControllerProvider)
-        .sendFileMessage(context, file, widget.recieverUserId, messageEnum);
+    ref.read(chatControllerProvider).sendFileMessage(
+          context,
+          file,
+          widget.recieverUserId,
+          messageEnum,
+          widget.isGroupChat,
+        );
   }
 
   void selectImage() async {
@@ -96,17 +154,14 @@ class _BottomChatFieldState extends ConsumerState<BottomChatField> {
   }
 
   @override
-  void dispose() {
-    messageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final messageReply = ref.watch(messageReplyProvider);
+    final isShowMessageReply = messageReply != null;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
+          isShowMessageReply ? const MessageReplyPreview() : const SizedBox(),
           Row(
             children: [
               Expanded(
@@ -125,7 +180,7 @@ class _BottomChatFieldState extends ConsumerState<BottomChatField> {
                     fillColor: mobileChatBoxColor,
                     prefixIcon: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
+                        horizontal: 0,
                       ),
                       child: IconButton(
                         onPressed: toggleEmojiKeyboardContainer,
@@ -190,7 +245,11 @@ class _BottomChatFieldState extends ConsumerState<BottomChatField> {
                     child: GestureDetector(
                       onTap: sendTextMessage,
                       child: Icon(
-                        isMicEnabled ? Icons.mic : Icons.send,
+                        isMicEnabled
+                            ? isRecording
+                                ? Icons.close
+                                : Icons.mic
+                            : Icons.send,
                         color: Colors.white,
                       ),
                     ),
